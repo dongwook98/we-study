@@ -1,65 +1,40 @@
 import { Link } from 'react-router';
 
+import LoginForm from '@components/Login/LoginForm';
+
 function LoginPage() {
   return (
     <div className='fixed inset-0 bg-opacity-50 backdrop-blur-[2px] flex items-center justify-center p-4'>
       <div className='bg-white rounded-xl shadow-xl w-full max-w-md relative p-8'>
         {/* Close Button */}
-        <button className='absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full'>
-          <svg
-            className='w-6 h-6'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
+        <Link to='/'>
+          <button
+            className='absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full'
+            onClick={() => (window.location.href = '/')}
           >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M6 18L18 6M6 6l12 12'
-            />
-          </svg>
-        </button>
-
+            <svg
+              className='w-6 h-6'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M6 18L18 6M6 6l12 12'
+              />
+            </svg>
+          </button>
+        </Link>
         {/* Login Content */}
         <div className='space-y-6'>
           <div className='text-center'>
             <h2 className='text-3xl font-bold text-gray-900'>WeStudy</h2>
-            <p className='mt-2 text-gray-600'>로그인</p>
+            <p className='mt-2 text-gray-600'>WeStudy 로그인</p>
           </div>
 
-          <form className='space-y-4'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                이메일
-              </label>
-              <input
-                type='email'
-                required
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                placeholder='email@example.com'
-              />
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                비밀번호
-              </label>
-              <input
-                type='password'
-                required
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                placeholder='••••••••'
-              />
-            </div>
-
-            <button
-              type='submit'
-              className='w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors'
-            >
-              로그인
-            </button>
-          </form>
+          <LoginForm />
 
           <div className='relative'>
             <div className='absolute inset-0 flex items-center'>
@@ -70,7 +45,7 @@ function LoginPage() {
             </div>
           </div>
 
-          <div className='grid grid-cols-2 gap-3'>
+          {/* <div className='grid grid-cols-2 gap-3'>
             <button className='flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition-colors'>
               <svg className='w-5 h-5' viewBox='0 0 48 48'>
                 <path
@@ -99,7 +74,7 @@ function LoginPage() {
               </svg>
               <span>GitHub</span>
             </button>
-          </div>
+          </div> */}
 
           <p className='text-center text-sm text-gray-600'>
             계정이 없으신가요?{' '}
@@ -107,7 +82,7 @@ function LoginPage() {
               to='/signup'
               className='text-blue-600 hover:text-blue-500 font-medium'
             >
-              회원가입
+              회원가입 하러가기
             </Link>
           </p>
         </div>

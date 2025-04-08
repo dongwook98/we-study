@@ -6,6 +6,7 @@ import Study, {
   StudyLevel,
   StudyStatus,
 } from '../models/Study';
+import { successResponse, errorResponse } from '../utils/responseUtils';
 
 // @desc    스터디 생성
 // @route   POST /api/studies
@@ -52,12 +53,19 @@ export const createStudy = async (
       region,
     });
 
-    res.status(201).json(study);
+    return successResponse(
+      res,
+      '스터디가 성공적으로 생성되었습니다',
+      study,
+      201
+    );
   } catch (error: any) {
     // Mongoose 유효성 검사 오류 처리
     if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map((err: any) => err.message);
-      return res.status(400).json({ message: messages[0] });
+      const messages = Object.values(error.errors).map(
+        (err: any) => err.message
+      );
+      return errorResponse(res, messages[0], 400);
     }
     next(error);
   }
@@ -75,7 +83,12 @@ export const getStudies = async (
     const studies = await Study.find({})
       .populate('leader', 'nickname email')
       .sort({ createdAt: -1 });
-    res.json(studies);
+
+    return successResponse(
+      res,
+      '스터디 목록을 성공적으로 조회했습니다',
+      studies
+    );
   } catch (error) {
     next(error);
   }
@@ -95,9 +108,13 @@ export const getStudyById = async (
       .populate('participants', 'nickname email');
 
     if (study) {
-      res.json(study);
+      return successResponse(
+        res,
+        '스터디 상세 정보를 성공적으로 조회했습니다',
+        study
+      );
     } else {
-      res.status(404).json({ message: '스터디를 찾을 수 없습니다' });
+      return errorResponse(res, '스터디를 찾을 수 없습니다', 404);
     }
   } catch (error) {
     next(error);
@@ -132,14 +149,7 @@ export const updateStudy = async (
     const study = await Study.findById(req.params.id);
 
     if (!study) {
-      return res.status(404).json({ message: '스터디를 찾을 수 없습니다' });
-    }
-
-    // 스터디 리더만 수정 가능
-    if (study.leader.toString() !== req.user._id.toString()) {
-      return res
-        .status(403)
-        .json({ message: '스터디 리더만 수정할 수 있습니다' });
+      return errorResponse(res, '스터디를 찾을 수 없습니다', 404);
     }
 
     // 스터디 정보 업데이트
@@ -168,12 +178,18 @@ export const updateStudy = async (
     study.region = (region as StudyRegion) || study.region;
 
     const updatedStudy = await study.save();
-    res.json(updatedStudy);
+    return successResponse(
+      res,
+      '스터디 정보가 성공적으로 업데이트되었습니다',
+      updatedStudy
+    );
   } catch (error: any) {
     // Mongoose 유효성 검사 오류 처리
     if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map((err: any) => err.message);
-      return res.status(400).json({ message: messages[0] });
+      const messages = Object.values(error.errors).map(
+        (err: any) => err.message
+      );
+      return errorResponse(res, messages[0], 400);
     }
     next(error);
   }
@@ -191,18 +207,11 @@ export const deleteStudy = async (
     const study = await Study.findById(req.params.id);
 
     if (!study) {
-      return res.status(404).json({ message: '스터디를 찾을 수 없습니다' });
-    }
-
-    // 스터디 리더만 삭제 가능
-    if (study.leader.toString() !== req.user._id.toString()) {
-      return res
-        .status(403)
-        .json({ message: '스터디 리더만 삭제할 수 있습니다' });
+      return errorResponse(res, '스터디를 찾을 수 없습니다', 404);
     }
 
     await Study.deleteOne({ _id: req.params.id });
-    res.json({ message: '스터디가 삭제되었습니다' });
+    return successResponse(res, '스터디가 성공적으로 삭제되었습니다', null);
   } catch (error) {
     next(error);
   }
@@ -220,7 +229,7 @@ export const joinStudy = async (
     const study = await Study.findById(req.params.id);
 
     if (!study) {
-      return res.status(404).json({ message: '스터디를 찾을 수 없습니다' });
+      return errorResponse(res, '스터디를 찾을 수 없습니다', 404);
     }
 
     // 이미 참가한 경우
@@ -229,12 +238,12 @@ export const joinStudy = async (
         (participant) => participant.toString() === req.user._id.toString()
       )
     ) {
-      return res.status(400).json({ message: '이미 참가한 스터디입니다' });
+      return errorResponse(res, '이미 참가한 스터디입니다', 400);
     }
 
     // 정원 초과 확인
     if (study.currentParticipants >= study.maxParticipants) {
-      return res.status(400).json({ message: '스터디 정원이 초과되었습니다' });
+      return errorResponse(res, '스터디 정원이 초과되었습니다', 400);
     }
 
     // 참가자 추가
@@ -242,7 +251,11 @@ export const joinStudy = async (
     study.currentParticipants += 1;
 
     const updatedStudy = await study.save();
-    res.json(updatedStudy);
+    return successResponse(
+      res,
+      '스터디에 성공적으로 참가했습니다',
+      updatedStudy
+    );
   } catch (error) {
     next(error);
   }
@@ -260,14 +273,12 @@ export const leaveStudy = async (
     const study = await Study.findById(req.params.id);
 
     if (!study) {
-      return res.status(404).json({ message: '스터디를 찾을 수 없습니다' });
+      return errorResponse(res, '스터디를 찾을 수 없습니다', 404);
     }
 
     // 리더는 탈퇴할 수 없음
     if (study.leader.toString() === req.user._id.toString()) {
-      return res
-        .status(400)
-        .json({ message: '스터디 리더는 탈퇴할 수 없습니다' });
+      return errorResponse(res, '스터디 리더는 탈퇴할 수 없습니다', 400);
     }
 
     // 참가하지 않은 경우
@@ -276,7 +287,7 @@ export const leaveStudy = async (
         (participant) => participant.toString() === req.user._id.toString()
       )
     ) {
-      return res.status(400).json({ message: '참가하지 않은 스터디입니다' });
+      return errorResponse(res, '참가하지 않은 스터디입니다', 400);
     }
 
     // 참가자 제거
@@ -286,7 +297,11 @@ export const leaveStudy = async (
     study.currentParticipants -= 1;
 
     const updatedStudy = await study.save();
-    res.json(updatedStudy);
+    return successResponse(
+      res,
+      '스터디에서 성공적으로 탈퇴했습니다',
+      updatedStudy
+    );
   } catch (error) {
     next(error);
   }

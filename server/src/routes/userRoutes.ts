@@ -1,19 +1,17 @@
 import express from 'express';
-import { registerUser, loginUser, logoutUser, refreshToken } from '../controllers/userController';
+import {
+  getUserProfile,
+  updateUserProfile,
+} from '../controllers/userController';
 import { protect } from '../middleware/auth';
 
 const router = express.Router();
 
-// 회원가입 라우트
-router.post('/signup', registerUser);
+// 대시보드 라우트 (보호됨)
+// router.get('/dashboard', protect, getUserDashboard);
 
-// 로그인 라우트
-router.post('/login', loginUser);
-
-// 토큰 갱신 라우트
-router.post('/refresh-token', refreshToken);
-
-// 로그아웃 라우트 (인증 필요)
-router.post('/logout', protect, logoutUser);
+// 프로필 라우트
+router.get('/profile/:id', getUserProfile); // 공개 - 누구나 프로필 볼 수 있음
+router.put('/profile', protect, updateUserProfile); // 보호됨 - 인증된 사용자만 업데이트 가능
 
 export default router;

@@ -42,41 +42,101 @@ const studyStatuses = ['open', 'in_progress', 'closed'] as const;
 export type StudyStatus = (typeof studyStatuses)[number];
 
 export interface IStudy extends Document {
+  /**
+   * 스터디 제목
+   */
   title: string;
+  
+  /**
+   * 스터디 설명
+   * 최대 1000자까지 작성 가능
+   */
   description: string;
+  
+  /**
+   * 스터디 카테고리
+   * @example 'development_it', 'language_learning', 'career_development'
+   */
   category: StudyCategory;
+  
+  /**
+   * 최대 참가자 수
+   * 2명 이상 100명 이하로 설정 가능
+   */
   maxParticipants: number;
+  
+  /**
+   * 현재 참가자 수
+   * 기본값은 1명(스터디 생성자)
+   */
   currentParticipants: number;
+  
+  /**
+   * 스터디 리더의 사용자 ID
+   */
   leader: mongoose.Types.ObjectId;
+  
+  /**
+   * 스터디 참가자들의 사용자 ID 배열
+   */
   participants: mongoose.Types.ObjectId[];
+  
+  /**
+   * 스터디 시작 날짜
+   * 현재 날짜 이후여야 함
+   */
   startDate: Date;
+  
+  /**
+   * 스터디 종료 날짜
+   * 시작 날짜 이후여야 함
+   */
   endDate: Date;
+  
+  /**
+   * 스터디 진행 방식
+   * @example 'online', 'offline', 'hybrid'
+   */
   studyType: StudyType;
+  
+  /**
+   * 스터디 난이도
+   * @example 'beginner', 'intermediate', 'advanced'
+   */
   studyLevel: StudyLevel;
+  
   /**
    * 모집 상태
    * @example 'open', 'in_progress', 'closed'
    */
   status: StudyStatus;
+  
   /**
    * 스터디 관련 태그
+   * 최대 10개까지 추가 가능
    * @example ['코딩테스트', '취업준비']
    */
   tags: string[];
+  
   /**
    * 썸네일 이미지 URL
    */
   thumbnail?: string;
+  
   /**
    * 광역시도
+   * 오프라인/하이브리드 스터디인 경우 필수
    * @example '서울특별시'
    */
   region?: StudyRegion;
+  
   /**
    * 상세 스터디 주소
+   * 오프라인/하이브리드 스터디인 경우 필수
    * @example '서울특별시 강남구 행복 카페'
    */
   location?: string;
+  
   createdAt: Date;
   updatedAt: Date;
 }
@@ -225,6 +285,15 @@ const studySchema = new Schema<IStudy>(
     timestamps: true,
   }
 );
+
+// 검색 성능 향상을 위한 인덱스 추가
+studySchema.index({ category: 1 });
+studySchema.index({ studyType: 1 });
+studySchema.index({ region: 1 });
+studySchema.index({ status: 1 });
+studySchema.index({ tags: 1 });
+studySchema.index({ startDate: 1 });
+studySchema.index({ leader: 1 });
 
 const Study = mongoose.model<IStudy>('Study', studySchema);
 
